@@ -387,6 +387,54 @@ dl.abbr dt,dl.abbr dd{min-width:0;overflow-wrap:anywhere}
 @media (max-width:640px){dl.abbr{display:block}dl.abbr dd{margin:0 0 8px}}
 .tmain p,.tmain li{overflow-wrap:anywhere}
 
+/* Новогоднее оформление: гирлянда под панелью, снег, плашка в шапке главной.
+   Подключается флагом НОВЫЙ_ГОД в build_site.py; выключить — поставить False и пересобрать. */
+:root{
+  --ny-wire:#8a8c97; --ny-r:#d63c3c; --ny-g:#e0a21f; --ny-e:#2e9a58; --ny-b:#3a78d6;
+  --ny-glow:0; --snow:rgba(110,140,170,.55); --ny-ink:#b3302c; --ny-bg:#fdf0ef;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ny-wire:#5d606c; --ny-r:#ff6b6b; --ny-g:#ffcc4d; --ny-e:#4fd68a; --ny-b:#6aa8ff;
+  --ny-glow:1; --snow:rgba(255,255,255,.78); --ny-ink:#ff8f86; --ny-bg:#3a1d1d;
+}}
+:root[data-theme="dark"]{
+  --ny-wire:#5d606c; --ny-r:#ff6b6b; --ny-g:#ffcc4d; --ny-e:#4fd68a; --ny-b:#6aa8ff;
+  --ny-glow:1; --snow:rgba(255,255,255,.78); --ny-ink:#ff8f86; --ny-bg:#3a1d1d;
+}
+[id]{scroll-margin-top:calc(var(--bar) + 30px)}
+
+/* гирлянда висит под панелью и не мешает нажатиям */
+.bar{position:sticky}
+.garland{position:absolute;left:0;right:0;top:100%;height:24px;pointer-events:none;overflow:hidden}
+.garland svg{display:block;width:100%;height:24px}
+.garland .w{fill:none;stroke:var(--ny-wire);stroke-width:1.2}
+.garland .cap{fill:var(--ny-wire)}
+.garland .b{animation:ny-tw 2.8s ease-in-out infinite}
+.garland .c0{fill:var(--ny-r)} .garland .c1{fill:var(--ny-g)} .garland .c2{fill:var(--ny-e)} .garland .c3{fill:var(--ny-b)}
+.garland .d1{animation-delay:-.7s} .garland .d2{animation-delay:-1.4s} .garland .d3{animation-delay:-2.1s}
+@keyframes ny-tw{0%,100%{opacity:1}50%{opacity:.45}}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .garland .b{filter:drop-shadow(0 0 3px currentColor)}}
+:root[data-theme="dark"] .garland .b{filter:drop-shadow(0 0 3px currentColor)}
+.garland .c0{color:var(--ny-r)} .garland .c1{color:var(--ny-g)} .garland .c2{color:var(--ny-e)} .garland .c3{color:var(--ny-b)}
+
+/* снег: холст под панелью, поверх текста, без нажатий */
+.ny-snow{position:fixed;inset:0;width:100%;height:100%;z-index:4;pointer-events:none}
+
+/* кнопка снега в панели */
+.ny-btn{font:inherit;font-size:13px;line-height:1;display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper);color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.ny-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
+.ny-btn[aria-pressed="true"]{color:var(--ny-b);border-color:var(--ny-b)}
+.ny-btn:hover{border-color:var(--ny-b)}
+@media (max-width:760px){.ny-btn{margin-left:auto}.ny-btn span{display:none}}
+
+/* плашка на главной */
+.ny-badge{display:inline-flex;align-items:center;gap:8px;margin:0 0 12px;padding:5px 12px 5px 8px;border-radius:999px;background:var(--ny-bg);color:var(--ny-ink);font-size:13.5px;font-weight:500;max-width:100%}
+.ny-badge svg{width:18px;height:18px;flex:none}
+.ny-badge .t1{fill:var(--ny-e)} .ny-badge .t2{fill:var(--ny-g)} .ny-badge .t3{fill:var(--ny-r)}
+
+@media (prefers-reduced-motion: reduce){.garland .b{animation:none}}
+@media print{.garland,.ny-snow,.ny-btn,.ny-badge{display:none!important}}
+
 </style>
 <header class="bar">
   <div class="bar-in">
@@ -399,6 +447,7 @@ dl.abbr dt,dl.abbr dd{min-width:0;overflow-wrap:anywhere}
 <div class="view" id="view-search" hidden><div class="wrap"><div class="eyebrow">Поиск</div><p class="s-count" id="s-count"></p><div id="s-results"></div></div></div>
 <div class="view" id="home"><section class="hero"><div class="hero-in">
   <div class="hero-t">
+    <div class="ny-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="t1" d="M12 3 6 11h3l-4 6h5v3h4v-3h5l-4-6h3z"/><circle class="t2" cx="12" cy="3" r="1.8"/><circle class="t3" cx="10" cy="13" r="1.1"/><circle class="t2" cx="14.5" cy="15" r="1.1"/></svg>С наступающим 2027 годом! Удачи на экзамене</div>
     <div class="eyebrow">Подготовка к экзамену · неофициальные конспекты</div>
     <h1>Поликлиническая терапия</h1>
     <p class="lead">Разборы экзаменационных вопросов: теория, ведение пациента на участке, каркасы устных ответов и задачи. Основа каждой темы — действующие клинические рекомендации (КР) Министерства здравоохранения Российской Федерации.</p>
@@ -3345,6 +3394,123 @@ dl.abbr dt,dl.abbr dd{min-width:0;overflow-wrap:anywhere}
   /* ---------- Запуск ---------- */
   window.addEventListener("hashchange", route);
   route();
+})();
+
+/* Новогоднее оформление: гирлянда под панелью и снег с кнопкой выключения. */
+(function () {
+  var bar = document.querySelector(".bar");
+  if (!bar) return;
+  var NS = "http://www.w3.org/2000/svg";
+
+  // ---------- гирлянда ----------
+  var g = document.createElement("div");
+  g.className = "garland";
+  g.setAttribute("aria-hidden", "true");
+  bar.appendChild(g);
+  var lastW = 0;
+  function drawGarland() {
+    var w = Math.round(g.clientWidth || window.innerWidth);
+    if (!w || w === lastW) return;
+    lastW = w;
+    var seg = w < 600 ? 72 : 96, n = Math.ceil(w / seg), d = "M0 1.5", bulbs = "", k = 0;
+    for (var i = 0; i < n; i++) {
+      var x0 = i * seg;
+      d += " Q" + (x0 + seg / 2) + " 15 " + (x0 + seg) + " 1.5";
+      [0.25, 0.5, 0.75].forEach(function (t) {
+        var x = x0 + seg * t, y = (1 - t) * (1 - t) * 1.5 + 2 * (1 - t) * t * 15 + t * t * 1.5;
+        var c = k % 4, dl = (k * 3) % 4;
+        bulbs += '<rect class="cap" x="' + (x - 1.6).toFixed(1) + '" y="' + y.toFixed(1) + '" width="3.2" height="2.6" rx=".6"/>' +
+          '<ellipse class="b c' + c + " d" + dl + '" cx="' + x.toFixed(1) + '" cy="' + (y + 6.6).toFixed(1) + '" rx="3.1" ry="4.4"/>';
+        k++;
+      });
+    }
+    g.innerHTML = '<svg xmlns="' + NS + '" viewBox="0 0 ' + w + ' 24" preserveAspectRatio="none"><path class="w" d="' + d + '"/>' + bulbs + "</svg>";
+  }
+  drawGarland();
+  window.addEventListener("resize", drawGarland);
+
+  // ---------- снег ----------
+  var KEY = "pt-snow";
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) { saved = null; }
+  var on = saved === null ? !reduce : saved === "1";
+
+  var btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "ny-btn";
+  btn.title = "Включить или выключить снег";
+  btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9 4l3 2 3-2M9 20l3-2 3 2"/></svg><span>Снег</span>';
+  var slot = bar.querySelector(".bar-nav");
+  if (slot && slot.parentNode) slot.parentNode.insertBefore(btn, slot.nextSibling); else bar.appendChild(btn);
+
+  var cv = null, ctx = null, flakes = [], raf = 0, W = 0, H = 0, dpr = 1, color = "", frame = 0;
+  function readColor() {
+    color = getComputedStyle(document.documentElement).getPropertyValue("--snow").trim() || "rgba(150,170,190,.6)";
+  }
+  function size() {
+    if (!cv) return;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var want = Math.round(Math.min(130, Math.max(36, W * H / 10000)));
+    while (flakes.length < want) flakes.push(make(true));
+    flakes.length = want;
+  }
+  function make(anywhere) {
+    var r = 1.1 + Math.random() * 2.3;
+    return { x: Math.random() * W, y: anywhere ? Math.random() * H : -6, r: r,
+             vy: 0.2 + r * 0.25 + Math.random() * 0.2, ph: Math.random() * 6.28, sw: 0.3 + Math.random() * 0.6 };
+  }
+  function tick() {
+    raf = 0;
+    if (!on || document.hidden) return;
+    if (frame++ % 90 === 0) readColor();
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    for (var i = 0; i < flakes.length; i++) {
+      var f = flakes[i];
+      f.ph += 0.012;
+      f.y += f.vy;
+      f.x += Math.sin(f.ph) * f.sw * 0.5;
+      if (f.y > H + 6 || f.x < -10 || f.x > W + 10) { flakes[i] = make(false); continue; }
+      ctx.moveTo(f.x + f.r, f.y);
+      ctx.arc(f.x, f.y, f.r, 0, 6.2832);
+    }
+    ctx.fill();
+    raf = requestAnimationFrame(tick);
+  }
+  function start() {
+    if (!cv) {
+      cv = document.createElement("canvas");
+      cv.className = "ny-snow";
+      cv.setAttribute("aria-hidden", "true");
+      document.body.appendChild(cv);
+      ctx = cv.getContext("2d");
+      window.addEventListener("resize", size);
+    }
+    cv.hidden = false;
+    readColor(); size();
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+  function stop() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+    if (cv) { ctx.clearRect(0, 0, W, H); cv.hidden = true; }
+  }
+  function apply() {
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    if (on) start(); else stop();
+  }
+  btn.addEventListener("click", function () {
+    on = !on;
+    try { localStorage.setItem(KEY, on ? "1" : "0"); } catch (e) { /* без сохранения */ }
+    apply();
+  });
+  document.addEventListener("visibilitychange", function () { if (on && !document.hidden && !raf && cv) raf = requestAnimationFrame(tick); });
+  apply();
 })();
 
 </script>
