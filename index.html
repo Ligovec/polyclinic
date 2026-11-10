@@ -4535,6 +4535,63 @@ dl.abbr dt,dl.abbr dd{min-width:0;overflow-wrap:anywhere}
   <div class="ask-log" id="ask-log" aria-live="polite"></div>
   <form id="ask-form"><label class="sr" for="ask-input">Ваш вопрос</label><textarea id="ask-input" rows="2" placeholder="Например: почему именно эта доза?"></textarea><button type="submit" id="ask-send">Отправить</button></form>
 </aside>
+<style>
+.sup{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:6;font-size:14px;transition:bottom .2s}
+.sup.up{bottom:calc(68px + env(safe-area-inset-bottom,0px))}
+.sup-btn{display:inline-flex;align-items:center;gap:8px;font:inherit;font-size:14.5px;font-weight:600;padding:9px 18px 9px 14px;border-radius:999px;border:1.5px solid var(--accent);background:var(--paper);color:var(--accent);cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.12)}
+.sup-btn:hover,.sup-btn[aria-expanded="true"]{background:var(--accent);color:var(--paper)}
+.sup-btn svg{width:17px;height:17px;flex:none;fill:currentColor}
+.sup-card{position:absolute;right:0;bottom:calc(100% + 10px);width:min(330px,calc(100vw - 32px));padding:16px 18px 14px;border:1px solid var(--line-2);border-radius:12px;background:var(--paper);color:var(--ink);box-shadow:0 8px 28px rgba(0,0,0,.12)}
+.sup-card[hidden]{display:none}
+.sup-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.sup-h b{font-size:15px}
+.sup-x{font:inherit;font-size:20px;line-height:1;border:0;background:none;color:var(--ink-3);cursor:pointer;padding:0 2px}
+.sup-t{font-size:13.5px;line-height:1.5;color:var(--ink-2);margin:0 0 12px}
+.sup-k{font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);margin-bottom:3px}
+.sup-num{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:8px;background:var(--note-bg);margin-bottom:10px}
+.sup-num span{font-family:var(--f-mono);font-size:15.5px;letter-spacing:.03em;white-space:nowrap}
+.sup-copy{font:inherit;font-size:12.5px;padding:3px 10px;border-radius:6px;border:1px solid var(--line-2);background:var(--paper);color:var(--ink);cursor:pointer;flex:none}
+.sup-copy.ok{color:var(--ok-ink);border-color:var(--ok-ink)}
+.sup-who{font-size:14.5px;margin-bottom:10px}
+.sup-f{font-size:12px;color:var(--ink-3);margin:0;border-top:1px solid var(--line);padding-top:8px}
+.sup-btn:focus-visible,.sup-copy:focus-visible,.sup-x:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media print{.sup{display:none}}
+</style>
+<div class="sup" id="sup">
+  <div class="sup-card" id="sup-card" hidden role="dialog" aria-labelledby="sup-title">
+    <div class="sup-h"><b id="sup-title">Поддержать автора</b><button type="button" class="sup-x" id="sup-x" aria-label="Закрыть">×</button></div>
+    <p class="sup-t">Сайт бесплатный и без рекламы. Если разборы помогли подготовиться, можно поддержать работу над новыми темами — любой суммой.</p>
+    <div class="sup-k">Карта «Мир»</div>
+    <div class="sup-num"><span>2200 2414 1552 4481</span><button type="button" class="sup-copy" id="sup-copy" data-v="2200241415524481">Копировать</button></div>
+    <div class="sup-k">Получатель</div>
+    <div class="sup-who">Фокин С. О.</div>
+    <p class="sup-f">Перевод по номеру карты в приложении любого банка.</p>
+  </div>
+  <button type="button" class="sup-btn" id="sup-btn" aria-expanded="false" aria-controls="sup-card"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Поддержать автора</button>
+</div>
+<script>
+(function(){
+  var box=document.getElementById("sup"),card=document.getElementById("sup-card"),btn=document.getElementById("sup-btn"),home=document.getElementById("home");
+  function set(open){card.hidden=!open;btn.setAttribute("aria-expanded",open?"true":"false");}
+  btn.addEventListener("click",function(){set(card.hidden);});
+  document.getElementById("sup-x").addEventListener("click",function(){set(false);btn.focus();});
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!card.hidden){set(false);btn.focus();}});
+  document.addEventListener("click",function(e){if(!card.hidden&&!box.contains(e.target))set(false);});
+  var cp=document.getElementById("sup-copy");
+  cp.addEventListener("click",function(){
+    var v=cp.getAttribute("data-v");
+    function done(){cp.textContent="Скопировано";cp.classList.add("ok");setTimeout(function(){cp.textContent="Копировать";cp.classList.remove("ok");},1800);}
+    try{navigator.clipboard.writeText(v).then(done,function(){});}catch(e){}
+  });
+  var ask=document.getElementById("ask-open");
+  function lift(){box.classList.toggle("up",!!ask&&!ask.hidden);}
+  if(ask){new MutationObserver(lift).observe(ask,{attributes:true,attributeFilter:["hidden"]});lift();}
+  function sync(){box.hidden=!home||home.hidden;if(box.hidden)set(false);}
+  if(home){new MutationObserver(sync).observe(home,{attributes:true,attributeFilter:["hidden"]});}
+  sync();
+})();
+</script>
+
 <script>
 (function () {
   "use strict";
