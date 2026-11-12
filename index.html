@@ -7696,38 +7696,40 @@ if(window.parent &amp;&amp; window.parent!==window){
 })();
 
 /* ---------- Скачать конспект в Word (12.11.2026) ----------
-   Файлы лежат в открытой версии сайта (GitHub Pages, папка files/). Там работает обычная ссылка с download.
-   В Claude к странице нельзя приложить .docx, а обычные скачивания просмотрщик запрещает: берём файл
-   из открытой версии и отдаём через возможность downloads (зритель подтверждает сохранение).
-   Если она недоступна или файл не загрузился — открываем файл в новой вкладке. */
+   Открытая версия (GitHub Pages): обычная ссылка с download на files/<slug>.docx.
+   В Claude обычные скачивания и загрузка с других сайтов запрещены, а .docx нельзя приложить к странице:
+   сборщик кладёт файлы в страницу (<script id="docx-data">, base64), и они отдаются через возможность
+   downloads — зритель подтверждает сохранение. Пока downloads не ответил, кнопки в Claude скрыты. */
 (function () {
   "use strict";
   if (!window.claude || typeof window.claude.use !== "function") return;
-  var BASE = "https://ligovec.github.io/polyclinic/";
-  [].forEach.call(document.querySelectorAll("a.dl"), function (a) {
-    a.href = BASE + a.getAttribute("href");
-    a.target = "_blank";
-    a.rel = "noopener";
-    a.removeAttribute("download");
-  });
-  var dl = null;
-  window.claude.use("downloads").then(function (ns) { dl = ns; }, function () { dl = null; });
-  document.addEventListener("click", function (e) {
-    var a = e.target.closest && e.target.closest("a.dl");
-    if (!a || !dl) return;
-    e.preventDefault();
-    a.setAttribute("aria-busy", "true");
-    fetch(a.href)
-      .then(function (r) { if (!r.ok) throw { code: "fetch" }; return r.blob(); }, function () { throw { code: "fetch" }; })
-      .then(function (blob) { return dl.save({ filename: a.getAttribute("data-filename"), data: blob }); })
-      .catch(function (err) {
-        var code = err && err.code;
-        if (code === "declined") return;
-        if (code === "rate_limited") { alert("Окно сохранения уже открыто — подтвердите или закройте его."); return; }
-        window.open(a.href, "_blank", "noopener");
-      })
-      .then(function () { a.removeAttribute("aria-busy"); });
-  });
+  var rows = [].slice.call(document.querySelectorAll(".dlrow"));
+  var holder = document.getElementById("docx-data");
+  rows.forEach(function (r) { r.hidden = true; });
+  if (!holder) return;
+  var files = null;
+  try { files = JSON.parse(holder.textContent); } catch (e) { return; }
+  window.claude.use("downloads").then(function (dl) {
+    if (!dl) return;
+    rows.forEach(function (r) { r.hidden = false; });
+    document.addEventListener("click", function (e) {
+      var a = e.target.closest && e.target.closest("a.dl");
+      if (!a) return;
+      e.preventDefault();
+      var b64 = files[a.getAttribute("href")];
+      if (!b64) return;
+      var bin = atob(b64), bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      a.setAttribute("aria-busy", "true");
+      dl.save({ filename: a.getAttribute("data-filename"), data: new Blob([bytes]) })
+        .catch(function (err) {
+          var code = err && err.code;
+          if (code === "rate_limited") alert("Окно сохранения уже открыто — подтвердите или закройте его.");
+          else if (code !== "declined") alert("Скачать файл здесь не получилось.");
+        })
+        .then(function () { a.removeAttribute("aria-busy"); });
+    });
+  }, function () {});
 })();
 
 /* Новогоднее оформление: гирлянда под панелью и снег с кнопкой выключения. */
