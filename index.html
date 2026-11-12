@@ -7697,8 +7697,9 @@ if(window.parent &amp;&amp; window.parent!==window){
 
 /* ---------- Скачать конспект в Word (12.11.2026) ----------
    Файлы лежат в открытой версии сайта (GitHub Pages, папка files/). Там работает обычная ссылка с download.
-   В Claude к странице нельзя приложить .docx, поэтому ссылка ведёт на тот же файл в открытой версии
-   и открывается в новой вкладке — браузер скачивает его оттуда. */
+   В Claude к странице нельзя приложить .docx, а обычные скачивания просмотрщик запрещает: берём файл
+   из открытой версии и отдаём через возможность downloads (зритель подтверждает сохранение).
+   Если она недоступна или файл не загрузился — открываем файл в новой вкладке. */
 (function () {
   "use strict";
   if (!window.claude || typeof window.claude.use !== "function") return;
@@ -7707,6 +7708,25 @@ if(window.parent &amp;&amp; window.parent!==window){
     a.href = BASE + a.getAttribute("href");
     a.target = "_blank";
     a.rel = "noopener";
+    a.removeAttribute("download");
+  });
+  var dl = null;
+  window.claude.use("downloads").then(function (ns) { dl = ns; }, function () { dl = null; });
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a.dl");
+    if (!a || !dl) return;
+    e.preventDefault();
+    a.setAttribute("aria-busy", "true");
+    fetch(a.href)
+      .then(function (r) { if (!r.ok) throw { code: "fetch" }; return r.blob(); }, function () { throw { code: "fetch" }; })
+      .then(function (blob) { return dl.save({ filename: a.getAttribute("data-filename"), data: blob }); })
+      .catch(function (err) {
+        var code = err && err.code;
+        if (code === "declined") return;
+        if (code === "rate_limited") { alert("Окно сохранения уже открыто — подтвердите или закройте его."); return; }
+        window.open(a.href, "_blank", "noopener");
+      })
+      .then(function () { a.removeAttribute("aria-busy"); });
   });
 })();
 
